@@ -55,112 +55,161 @@
 #define MODE_3D_PONG             27
 #define MODE_LOAD_KINGS          28
 
+const byte interruptReceivePin = 2;
+const byte digitalPinToInterrupt = 0;
+
+byte pongMode = B00001011;      // Normal demo mode
+byte paddleCoords[2][2] =
+  {
+    { B00000000, B00000000 },   // Paddle 1 X and Z
+    { B00000000, B00000000 }    // Paddle 2 X and Z
+  };
+
+float pongBallXcoord = 1.0;
+float pongBallYcoord = 1.0;
+float pongBallZcoord = 1.0;
+
+float pongBallXvelocity = 0.5;
+float pongBallYvelocity = 1.0;
+float pongBallZvelocity = 0.5;
+
+int  pongIterations = 0;
+byte pongPassIterations = 0;
+
+volatile boolean gotNewData = false;
+
 void setup()
 {
-  Wire.begin(); // join i2c bus (address optional for master)
-  delay( 5 * 1000 );  // Allow other parts of system to catch up
+  Wire.begin();            // join i2c bus (address optional for master)
+  delay( 5 * 1000 );       // Allow other parts of system to catch up
+  Serial.begin( 9600 );
+  
+  pinMode( interruptReceivePin, INPUT_PULLUP );
+  // attachInterrupt( digitalPinToInterrupt( interruptReceivePin ), getSerialData, RISING );
+  attachInterrupt( digitalPinToInterrupt, flagNewData, RISING );
+  
+  pinMode( LED_BUILTIN, OUTPUT );
+  digitalWrite( LED_BUILTIN, LOW );
 }
 
 void loop()
 {
-  run3Dpong( 15, 25 );
-  flashKings( 100 );
-
-  // flashMakerHQ( 100 );   // frame duration
-  // flashObra( 75 );
-
-  loadHelixAnimation();   // load the first half of the buffer with the helix animation
-  loadBlueSineWaves();    // load the second half with the sine wave pattern
-
-  // Cycle through the animations. Tried using a time period (long startTime = millis(), etc.)
-  // but didn't work for some reason. Could have been a memory issue when I was using the temporary array.
-  // Now that I'm not using it, maybe the time thing will work.
-
-  cycleThroughAnimation( 0,   // pStartFrameIndex
-                         15,  // pEndFrameIndex,
-                         15,  // pAnimationDuration  // how long you want the animation to run in seconds (e.g. 10)
-                         100, // pFrameDuration      // how long each frame should persist in milliseconds (e.g. 100)
-                         -1   // pIterations         // number of iterations from pStartFrameIndex to pEndFrameIndex (-1 indicates NA)
-                        );
-                          
-  cycleThroughAnimation( 16, 31, 15, 100, -1 );
-
-  flashKings( 100 );
-
-  loadIntersectingPlanes();
-  loadSineWaveRibbons();
-
-  // loadSineWaveRibbonsPinkWhite();
-
-  // Cycle through the animations.
-  cycleThroughAnimation( 0, 15, 15, 100, -1 );
-  cycleThroughAnimation( 16, 31, 15, 100, -1 );
-
-  flashKings( 100 );
-
-  // cleanOutCube();
-  runKineticBall( 15, 50 );
-
-  runRunningMan( 30, 50 );
-
-  loadHorse();
-
-  cycleThroughAnimation( 0, 14, 20, 75, -1 );
-
-  flashKings( 100 );
-
-  loadHouse();
-  // loadHousePinkWhite();
-
-  cycleThroughAnimation(  0,  0, 15, 100, -1 ); // display the house in one orientation
-  cycleThroughAnimation(  1,  7, 0, 100,  1 );  // rotate 90 degrees
-  cycleThroughAnimation(  8,  8, 5, 100, -1 );  // hold
-  cycleThroughAnimation(  9, 15, 0, 100,  1 );  // rotate again 90 degrees
-  cycleThroughAnimation( 16, 16, 5, 100, -1 );  // hold
-  cycleThroughAnimation( 17, 23, 0, 100,  1 );  // rotate again 90 degrees
-  cycleThroughAnimation( 24, 24, 5, 100, -1 );  // hold
-  cycleThroughAnimation( 25, 31, 0, 100,  1 );  // rotate again 90 degrees
-  cycleThroughAnimation(  0,  0, 5, 100, -1 );  // hold
-
-  loadTelescopingBoxes();
-  cycleThroughAnimation(  0, 27, 15, 75, -1 );  // hold for three seconds
-
-  flashKings( 100 );
-
-  loadDinerEnBlanc();
-  cycleThroughAnimation( 0, 0, 10, 100, -1 );    // hold on the static image for 10 seconds
-  cycleThroughAnimation( 0, 31, 20, 50, 10 );    // cycle through the frames rotating the Eiffel Tower
+  // Some code triggered by the ISR will need to go here to change the
+  // value of pongMode by looking at the four MSBs of the inbound bytes.
   
-  loadWhiteHelix();
-  cycleThroughAnimation( 0, 31, 30, 50, -1 );    // 30 seconds of the helix
+  // pongMode = B10000000;  // single player
+  // pongMode = B10010000;  // multi-player
+  // pongMode = B10100000;  // pong demo
+  // pongMode = B10110000;  // normal demo
 
-  loadWhiteWaves();
-  cycleThroughAnimation( 16, 31, 30, 100, -1 );   // 30 seconds of the waves
+  if ( gotNewData )
+  {
+    while ( Serial.available() == 0 );  // idle while waiting for data
 
-  flashKings( 100 );
+    while( Serial.available() > 0 )
+    {
+      byte inputData = Serial.read();
 
-  // cleanOutCube();
-  runWhiteBall( 30, 25 );
+      parseSerialData( inputData );
+      
+      /*
+      byte dataLabel = inputData >> 4;
+      
+      // if the MSB is 1, then the input data is the pong mode
+      if ( bitRead( dataLabel, 3 ) == 1 )
+      {
+        pongMode = dataLabel;
+      }
+      else if ( dataLabel < 4 )  // if it's a paddle coordinate
+      {
+        // the four LSBs hold the data value
+        byte dataValue = inputData & B00001111;
+        
+        byte inx = bitRead( dataLabel, 0 );
+        byte jnx = bitRead( dataLabel, 1 );
 
-  loadJewel();
+        paddleCoords[jnx][inx] = dataValue;
+      }
+      */
+    }
+    
+    gotNewData = false;
+  }    
 
-  cycleThroughAnimation(  0,  0,  3, 100, -1 );    //  3 seconds of the jewel holding still
-  cycleThroughAnimation(  0, 31, 15, 100, -1 );    // 15 seconds of the jewel rotating
+  if ( pongMode != B00001011 )  // If not equal to normal demo mode
+  {
+    run3Dpong( 50 );
+    // run3Dpong( 100 );
+      
+    pongIterations++;
 
-  // flashTreBordenCo( 75 );
-  // flashIdeasActivated( 75 );
+    // if frame duration is 100ms, then 100 iterations means every 10 seconds.    
+    if ( pongIterations == 100 )
+    {
+      pongIterations = 0;
+    }
+  }
+  else
+  {
+    if ( !gotNewData )
+    {
+      loadHelixAnimation();   // load the first half of the buffer with the helix animation
+      
+      cycleThroughAnimation( 0,   // pStartFrameIndex
+                             15,  // pEndFrameIndex,
+                             15,  // pAnimationDuration  // how long you want the animation to run in seconds (e.g. 10)
+                             100, // pFrameDuration      // how long each frame should persist in milliseconds (e.g. 100)
+                             -1   // pIterations         // number of iterations from pStartFrameIndex to pEndFrameIndex (-1 indicates NA)
+                            );
+    }      
+      
+    if ( !gotNewData )
+    {    
+      loadBlueSineWaves();    // load the second half with the sine wave pattern
+      cycleThroughAnimation( 16, 31, 15, 100, -1 );
+    }
 
-  /*
-  cleanOutCube();
+    if ( !gotNewData )
+    {
+      loadIntersectingPlanes();
+      cycleThroughAnimation( 0, 15, 15, 100, -1 );
+    }
 
-  // load indicated color into frame 0
-  // 1=RED, 2=GREEN, 3=BLUE, 4=YELLOW (1&2), 5=CYAN (2&3), 6=MAGENTA (1&3), 7=WHITE (1&2&3)
-  loadSolidColor( 2 );
+    if ( !gotNewData )
+    {    
+      loadSineWaveRibbons();
+      cycleThroughAnimation( 16, 31, 15, 100, -1 );
+    }
+  }
+}
 
-  cycleThroughAnimation( 0,  0, 15, 100, -1 );  // display frame 0 for 15 seconds
-  */
+void flagNewData()
+{
+  gotNewData = true;
+  digitalWrite( LED_BUILTIN, HIGH );
+  delay( 10 );
+  digitalWrite( LED_BUILTIN, LOW );
+}
+
+void parseSerialData( byte pInputData )
+{
+  byte dataLabel = pInputData >> 4;
   
-  // lather, rinse, repeat ...
+  // if the MSB is 1, then the input data is the pong mode
+  if ( bitRead( dataLabel, 3 ) == 1 )
+  {
+    pongMode = dataLabel;
+  }
+  else if ( dataLabel < 4 )  // if it's a paddle coordinate
+  {
+    // the four LSBs hold the data value
+    byte dataValue = pInputData & B00001111;
+    
+    byte inx = bitRead( dataLabel, 0 );
+    byte jnx = bitRead( dataLabel, 1 );
+
+    paddleCoords[jnx][inx] = dataValue;
+  }
 }
 
 void loadHelixAnimation()
@@ -196,17 +245,6 @@ void loadSineWaveRibbons()
   // delay( 1000 );  // allow a bit of time for the slaves to process
 }
 
-void loadSineWaveRibbonsPinkWhite()
-{
-  byte mode = MODE_LOAD_PNK_RIBBONS;
-  
-  Wire.beginTransmission( SLAVE_ADDRESS );
-  Wire.write( mode );
-  Wire.endTransmission();
-  
-  // delay( 1000 );  // allow a bit of time for the slaves to process
-}
-
 void loadIntersectingPlanes()
 {
   byte mode = MODE_LOAD_PLANES;
@@ -218,546 +256,149 @@ void loadIntersectingPlanes()
   // delay( 1000 );  // allow a bit of time for the slaves to process
 }
 
-void loadHorse()
-{
-  byte mode = MODE_LOAD_HORSE;
-
-  Wire.beginTransmission( SLAVE_ADDRESS );
-  Wire.write( mode );
-  Wire.endTransmission();  
-}
-
-void loadHouse()
-{
-  byte mode = MODE_LOAD_HOUSE;
-
-  Wire.beginTransmission( SLAVE_ADDRESS );
-  Wire.write( mode );
-  Wire.endTransmission();  
-}
-
-void loadHousePinkWhite()
-{
-  byte mode = MODE_LOAD_PNK_HOUSE;
-
-  Wire.beginTransmission( SLAVE_ADDRESS );
-  Wire.write( mode );
-  Wire.endTransmission();  
-}
-
-void loadTelescopingBoxes()
-{
-  byte mode = MODE_LOAD_TEL_BOXES;
-  
-  Wire.beginTransmission( SLAVE_ADDRESS );
-  Wire.write( mode );
-  Wire.endTransmission();  
-}
-
-void loadDinerEnBlanc()
-{
-  byte mode = MODE_LOAD_DINER_EN_BLANC;  
-
-  Wire.beginTransmission( SLAVE_ADDRESS );
-  Wire.write( mode );
-  Wire.endTransmission();  
-}
-
-void loadWhiteHelix()
-{
-  byte mode = MODE_LOAD_WHITE_HELIX;  
-
-  Wire.beginTransmission( SLAVE_ADDRESS );
-  Wire.write( mode );
-  Wire.endTransmission();  
-}
-
-void loadWhiteWaves()
-{
-  byte mode = MODE_LOAD_WHITE_WAVES;  
-
-  Wire.beginTransmission( SLAVE_ADDRESS );
-  Wire.write( mode );
-  Wire.endTransmission();  
-}
-
-void loadJewel()
-{
-  byte mode = MODE_LOAD_JEWEL;  
-
-  Wire.beginTransmission( SLAVE_ADDRESS );
-  Wire.write( mode );
-  Wire.endTransmission();  
-}
-  
-void loadSolidColor( byte pColor )
-{
-  byte mode = MODE_LOAD_SOLID_COLOR;  
-  
-  Wire.beginTransmission( SLAVE_ADDRESS );
-  Wire.write( mode );
-  Wire.write( pColor );
-  Wire.endTransmission();  
-}
-
-void runKineticBall( int pMovieDurationSeconds,
-                     int pFrameDurationMillis
-                   )
-{
-  byte mode = MODE_RUN_KINETIC_BALL;
-  float xCoord = 2.0;
-  float yCoord = 2.0;
-  float zCoord = 2.0;
-  float xVelocity = 1.0;
-  float yVelocity = 0.5;
-  float zVelocity = 0.75;
-  int maxIterations = (int) ( pMovieDurationSeconds * 1000 / pFrameDurationMillis );
-
-  for ( int inx = 0; inx < maxIterations; inx++ )
-  {
-    Wire.beginTransmission( SLAVE_ADDRESS );
-    Wire.write( mode );
-    Wire.write((byte) ( xCoord + 0.5 ));
-    Wire.write((byte) ( yCoord + 0.5 ));
-    Wire.write((byte) ( zCoord + 0.5 ));
-    Wire.endTransmission();
-
-    if ( xCoord >= 13.0 )
-    {
-      xVelocity = abs( xVelocity ) * (-1.0);
-    }
-    else if ( xCoord <= 2.0 )
-    {
-      xVelocity = abs( xVelocity );
-    }    
-    
-    if ( yCoord >= 13.0 )
-    {
-      yVelocity = abs( yVelocity ) * (-1.0);      
-    }
-    else if ( yCoord <= 2.0 )
-    {
-      yVelocity = abs( yVelocity );      
-    }
-    
-    if ( zCoord >= 13.0 )
-    {
-      zVelocity = abs( zVelocity ) * (-1.0);
-    }
-    else if ( zCoord <= 2.0 )
-    {
-      zVelocity = abs( zVelocity );
-    }
-
-    xCoord = xCoord + xVelocity;
-    yCoord = yCoord + yVelocity;
-    zCoord = zCoord + zVelocity;
-
-    delay( pFrameDurationMillis );
-  }  
-}
-
-void runWhiteBall( int pMovieDurationSeconds,
-                     int pFrameDurationMillis
-                   )
-{
-  byte mode = MODE_RUN_WHITE_BALL;
-  float xCoord = 2.0;
-  float yCoord = 2.0;
-  float zCoord = 2.0;
-  float xVelocity = 1.0;
-  float yVelocity = 0.5;
-  float zVelocity = 0.75;
-  int maxIterations = (int) ( pMovieDurationSeconds * 1000 / pFrameDurationMillis );
-
-  for ( int inx = 0; inx < maxIterations; inx++ )
-  {
-    Wire.beginTransmission( SLAVE_ADDRESS );
-    Wire.write( mode );
-    Wire.write((byte) ( xCoord + 0.5 ));
-    Wire.write((byte) ( yCoord + 0.5 ));
-    Wire.write((byte) ( zCoord + 0.5 ));
-    Wire.endTransmission();
-
-    if ( xCoord >= 13.0 )
-    {
-      xVelocity = abs( xVelocity ) * (-1.0);
-    }
-    else if ( xCoord <= 2.0 )
-    {
-      xVelocity = abs( xVelocity );
-    }    
-    
-    if ( yCoord >= 13.0 )
-    {
-      yVelocity = abs( yVelocity ) * (-1.0);      
-    }
-    else if ( yCoord <= 2.0 )
-    {
-      yVelocity = abs( yVelocity );      
-    }
-    
-    if ( zCoord >= 13.0 )
-    {
-      zVelocity = abs( zVelocity ) * (-1.0);
-    }
-    else if ( zCoord <= 2.0 )
-    {
-      zVelocity = abs( zVelocity );
-    }
-
-    xCoord = xCoord + xVelocity;
-    yCoord = yCoord + yVelocity;
-    zCoord = zCoord + zVelocity;
-
-    delay( pFrameDurationMillis );
-  }  
-}
-
-void run3Dpong( int pMovieDurationSeconds,
-                int pFrameDurationMillis
-              )
+void run3Dpong( int pFrameDurationMillis )
 {
   byte mode = MODE_3D_PONG;
-  float xCoord = 1.0;
-  float yCoord = 1.0;
-  float zCoord = 1.0;
-  float xVelocity = 1.0;
-  float yVelocity = 0.5;
-  float zVelocity = 0.75;
-  int maxIterations = (int) ( pMovieDurationSeconds * 1000 / pFrameDurationMillis );
 
-  for ( int inx = 0; inx < maxIterations; inx++ )
+  if ( pongBallXcoord >= 14.0 )
   {
-    Wire.beginTransmission( SLAVE_ADDRESS );
-    Wire.write( mode );
-    Wire.write((byte) ( xCoord + 0.5 ));
-    Wire.write((byte) ( yCoord + 0.5 ));
-    Wire.write((byte) ( zCoord + 0.5 ));
-    Wire.endTransmission();
-
-    if ( xCoord >= 14.0 )
-    {
-      xVelocity = abs( xVelocity ) * (-1.0);
-    }
-    else if ( xCoord <= 1.0 )
-    {
-      xVelocity = abs( xVelocity );
-    }    
-    
-    if ( yCoord >= 14.0 )
-    {
-      yVelocity = abs( yVelocity ) * (-1.0);      
-    }
-    else if ( yCoord <= 1.0 )
-    {
-      yVelocity = abs( yVelocity );      
-    }
-    
-    if ( zCoord >= 14.0 )
-    {
-      zVelocity = abs( zVelocity ) * (-1.0);
-    }
-    else if ( zCoord <= 1.0 )
-    {
-      zVelocity = abs( zVelocity );
-    }
-
-    xCoord = xCoord + xVelocity;
-    yCoord = yCoord + yVelocity;
-    zCoord = zCoord + zVelocity;
-
-    delay( pFrameDurationMillis );
-  }  
-}
-
-void runRunningMan( int pMovieDurationSeconds,
-                    int pFrameDurationMillis
-                  )
-{
-  byte mode = 4;   // load running man
-
-  Wire.beginTransmission( SLAVE_ADDRESS );
-  Wire.write( mode );
-  Wire.endTransmission();
-
-  delay( 1000 );  // allow a second for array buffer on slaves to load data
-  
-  int maxIterations = (int) ( pMovieDurationSeconds * 1000 / pFrameDurationMillis );
-
-  mode = 2;    // standard play mode
-
-  byte frameNumber = 0;
-
-  for ( int inx = 0; inx < maxIterations; inx++ )
+    pongBallXvelocity = abs( pongBallXvelocity ) * (-1.0);
+  }
+  else if ( pongBallXcoord <= 1.0 )
   {
-    if ( frameNumber == MAX_FRAMES )
-    {
-      frameNumber = 0;
-    }
-
-    Wire.beginTransmission( SLAVE_ADDRESS );
-    Wire.write( mode );
-    Wire.write( frameNumber );
-    Wire.endTransmission();
-      
-    delay( pFrameDurationMillis );      
-
-    frameNumber++;
+    pongBallXvelocity = abs( pongBallXvelocity );
   }    
-}
 
-void flashMakerHQ( int pFrameDurationMillis )
-{
-  byte mode = MODE_LOAD_MAKERHQ;
-
-  Wire.beginTransmission( SLAVE_ADDRESS );
-  Wire.write( mode );
-  Wire.endTransmission();
-
-  delay( 1000 );  // allow a second for array buffer on slaves to load data
-  
-  mode = MODE_SCROLL_PANEL_BACK;
-
-  for ( byte logoFrameNumber = 0; logoFrameNumber < MAX_FRAMES; logoFrameNumber++ )
+  if ( pongBallYcoord >= 14.0 )
   {
-    Wire.beginTransmission( SLAVE_ADDRESS );
-    Wire.write( mode );
-    Wire.write( logoFrameNumber );
-    Wire.endTransmission();
-
-    if ( logoFrameNumber == 15 )
+    // The paddle at the "back" of the cube (y = 15) is only
+    // active in multi-player mode.
+    // if ( pongMode == B10010000 )  // If in multi-player mode
+    if ( pongMode == B00001001 )
     {
-      // At frame 15, the logo is at the back of the cube. Now
-      // we start to scroll the "MakerHQ" lettering across the
-      // front of the cube from right to left. This will take
-      // 72 frames, 56 frames spanning the lettering itself
-      // plus 16 blank "follow up" frames to scroll the
-      // lettering completely off the cube.
-
-      mode = MODE_SCROLL_RIGHT_LEFT;
-      byte panelPair = 4;  // Scroll across panel pair four
-
-      for ( byte rtolFrmNbr = 0; rtolFrmNbr < 72; rtolFrmNbr++ )
+      if ( pongBallHitPaddle( 'B' )) // B for "Back"
       {
-        Wire.beginTransmission( SLAVE_ADDRESS );
-        Wire.write( mode );
-        Wire.write( panelPair );
-        Wire.write( rtolFrmNbr );
-        Wire.endTransmission();
-
-        delay( pFrameDurationMillis );
+        pongBallYvelocity = abs( pongBallYvelocity ) * (-1.0);
+      }
+      else
+      {
+        if ( pongPassIterations > 2 )
+        {
+          delay( 1000 );
+          pongBallYcoord = 1.0;
+          pongPassIterations = 0;
+        }
+        else
+        {
+          pongPassIterations++;
+        }
       }
     }
     else
     {
-      delay( pFrameDurationMillis );
+      pongBallYvelocity = abs( pongBallYvelocity ) * (-1.0);
     }    
   }
-}
-
-void flashKings( int pFrameDurationMillis )
-{
-  byte mode = MODE_LOAD_KINGS;
-
-  Wire.beginTransmission( SLAVE_ADDRESS );
-  Wire.write( mode );
-  Wire.endTransmission();
-
-  delay( 1000 );  // allow a second for array buffer on slaves to load data
-  
-  mode = MODE_SCROLL_PANEL_BACK;
-
-  // for ( byte logoFrameNumber = 0; logoFrameNumber < MAX_FRAMES; logoFrameNumber++ )
-  for ( byte logoFrameNumber = 0; logoFrameNumber < MAX_FRAMES - 4; logoFrameNumber++ )
+  else if ( pongBallYcoord <= 1.0 )
   {
-    Wire.beginTransmission( SLAVE_ADDRESS );
-    Wire.write( mode );
-    Wire.write( logoFrameNumber );
-    Wire.endTransmission();
-
-    // if ( logoFrameNumber == 15 )
-    if ( logoFrameNumber == 13 )
+    // if ( pongMode == B10000000 || pongMode == B10010000 ) // if in single or multi-player mode
+    if ( pongMode == B00001000 || pongMode == B00001001 )
     {
-      // At frame 15, the logo is at the back of the cube. Now
-      // we start to scroll the "KINGS" lettering across the
-      // front of the cube from right to left. This will take
-      // 64 frames, 48 frames spanning the lettering itself
-      // plus 16 blank "follow up" frames to scroll the
-      // lettering completely off the cube.
-
-      mode = MODE_SCROLL_RIGHT_LEFT;
-      
-      byte panelPair = 4;   // Scroll across panel pair four
-
-      for ( byte rtolFrmNbr = 0; rtolFrmNbr < 64; rtolFrmNbr++ )
+      if ( pongBallHitPaddle( 'F' )) // F for "Front"
+      {    
+        pongBallYvelocity = abs( pongBallYvelocity );
+      }
+      else
       {
-        Wire.beginTransmission( SLAVE_ADDRESS );
-        Wire.write( mode );
-        Wire.write( panelPair );
-        Wire.write( rtolFrmNbr );
-        Wire.endTransmission();
-
-        delay( pFrameDurationMillis );
+        if ( pongPassIterations > 2 )
+        {
+          delay( 1000 );
+          pongBallYcoord = 14.0;
+          pongPassIterations = 0;
+        }
+        else
+        {
+          pongPassIterations++;
+        }
       }
     }
     else
     {
-      delay( pFrameDurationMillis );
-    }    
+      pongBallYvelocity = abs( pongBallYvelocity );
+    }
   }
-}
+  
+  if ( pongBallZcoord >= 14.0 )
+  {
+    pongBallZvelocity = abs( pongBallZvelocity ) * (-1.0);
+  }
+  else if ( pongBallZcoord <= 1.0 )
+  {
+    pongBallZvelocity = abs( pongBallZvelocity );
+  }
 
-void flashTreBordenCo( int pFrameDurationMillis )
-{
-  byte mode = MODE_LOAD_TREBORDENCO;
+  pongBallXcoord = pongBallXcoord + pongBallXvelocity;
+  pongBallYcoord = pongBallYcoord + pongBallYvelocity;
+  pongBallZcoord = pongBallZcoord + pongBallZvelocity;
 
   Wire.beginTransmission( SLAVE_ADDRESS );
   Wire.write( mode );
+  Wire.write((byte) ( pongBallXcoord + 0.5 ));
+  Wire.write((byte) ( pongBallYcoord + 0.5 ));
+  Wire.write((byte) ( pongBallZcoord + 0.5 ));
+  Wire.write( pongMode << 4 );  // pongMode in the slaves is bitshifted to the left (i.e. 11010000 iso 00001101 )
+  Wire.write( paddleCoords[0][0] );
+  Wire.write( paddleCoords[0][1] );
+  Wire.write( paddleCoords[1][0] );
+  Wire.write( paddleCoords[1][1] );
   Wire.endTransmission();
 
-  delay( 1000 );  // allow a second for array buffer on slaves to load data
-  
-  // Start to scroll the "TRE BORDEN / CO" lettering across the front of
-  // the cube from right to left. This will take 174 frames, 154 frames
-  // spanning the lettering itself, 4 frames for the white background
-  // bordering the lettering, and 16 blank "follow up" frames to scroll the
-  // image completely off the cube.
-
-  mode = MODE_SCROLL_RIGHT_LEFT;
-  
-  byte panelPair = 4;  // Scroll across panel pair four
-
-  for ( byte rtolFrmNbr = 0; rtolFrmNbr < 174; rtolFrmNbr++ )
-  {
-    Wire.beginTransmission( SLAVE_ADDRESS );
-    Wire.write( mode );
-    Wire.write( panelPair );
-    Wire.write( rtolFrmNbr );
-    Wire.endTransmission();
-
-    delay( pFrameDurationMillis );
-  }
+  delay( pFrameDurationMillis );
 }
 
-void flashIdeasActivated( int pFrameDurationMillis )
+boolean pongBallHitPaddle( char pPosition )
 {
-  byte mode = MODE_LOAD_IDEAS_ACT;
+  // byte pongMode = B10110000;    // Normal demo mode
+  // byte paddleCoords[2][2] =
+  // {
+  //   { B00000000, B00000000 },   // Paddle 1 X and Z (front paddle)
+  //   { B00000000, B00000000 }    // Paddle 2 X and Z
+  // };
+  boolean rCode = false;
 
-  Wire.beginTransmission( SLAVE_ADDRESS );
-  Wire.write( mode );
-  Wire.endTransmission();
-
-  delay( 1000 );  // allow a second for array buffer on slaves to load data
+  /*
+  Serial.print( "pongBallXcoord = " );
+  Serial.println( pongBallXcoord );
+  Serial.print( "pongBallYcoord = " );
+  Serial.println( pongBallYcoord );
+  Serial.print( "pongBallZcoord = " );
+  Serial.println( pongBallZcoord );
+  */
   
-  // Start to scroll the "IDEAS ACTIVATED" lettering across the front of
-  // the cube from right to left. This will take 169 frames, 153 frames
-  // spanning the lettering itself plus 16 blank "follow up" frames to scroll
-  // the lettering completely off the cube.
-
-  mode = MODE_SCROLL_RIGHT_LEFT;
-
-  // Setting the panel pair ID to 0 vs. setting it to 1, 2 ... 8 will
-  // cause the scrolling logic to happen in all the panel pairs, not just
-  // isolated to one panel pair. Initially, I intended to have each panel
-  // pair contain the same data to scroll. Then, by specifying the panel
-  // pair ID 1, 2, 3 ... 8, you could scroll that lettering across
-  // whichever panel pair you choose, but you were limited to scrolling a
-  // single panel pair. I later added this 0 as an option to allow the
-  // scrolling to occur across all panel pairs. What you want to scroll
-  // in each panel pair in that case will depend on what data you store
-  // in that panel pair.
-  
-  byte panelPair = 0;
-
-  for ( byte rtolFrmNbr = 0; rtolFrmNbr < 169; rtolFrmNbr++ )
+  if ( pPosition == 'F' )
   {
-    Wire.beginTransmission( SLAVE_ADDRESS );
-    Wire.write( mode );
-    Wire.write( panelPair );
-    Wire.write( rtolFrmNbr );
-    Wire.endTransmission();
-
-    delay( pFrameDurationMillis );
-  }
-}
-
-void flashObra( int pFrameDurationMillis )
-{
-  byte mode = MODE_LOAD_OBRA;
-
-  Wire.beginTransmission( SLAVE_ADDRESS );
-  Wire.write( mode );
-  Wire.endTransmission();
-
-  delay( 1000 );  // allow a second for array buffer on slaves to load data
-  
-  // Start to scroll the "OBRA" lettering across the front of the cube from
-  // right to left. This will take 64 frames, 48 frames spanning the
-  // lettering itself and 16 blank "follow up" frames to scroll the image
-  // completely off the cube.
-
-  mode = MODE_SCROLL_RIGHT_LEFT;
-  
-  byte panelPair = 4;  // Scroll across panel pair four
-
-  for ( byte rtolFrmNbr = 0; rtolFrmNbr < 64; rtolFrmNbr++ )
-  {
-    Wire.beginTransmission( SLAVE_ADDRESS );
-    Wire.write( mode );
-    Wire.write( panelPair );
-    Wire.write( rtolFrmNbr );
-    Wire.endTransmission();
-
-    delay( pFrameDurationMillis );
-  }
-}
-
-void cleanOutCube()
-{
-  for ( byte panelPairId = 1; panelPairId <= 8; panelPairId++ )
-  {
-    for ( byte rowIndex = 0; rowIndex < NUM_ROWS; rowIndex++ )
+    if ( abs( paddleCoords[0][0] - ((byte) ( pongBallXcoord + 0.5 ))) <= 2 )
     {
-      sendToPanelPair( panelPairId, 0, 0, 0, rowIndex, B00000000, B00000000 );
-      sendToPanelPair( panelPairId, 0, 0, 1, rowIndex, B00000000, B00000000 );
-      sendToPanelPair( panelPairId, 0, 1, 0, rowIndex, B00000000, B00000000 );
-      sendToPanelPair( panelPairId, 0, 1, 1, rowIndex, B00000000, B00000000 );
-      sendToPanelPair( panelPairId, 0, 2, 0, rowIndex, B00000000, B00000000 );
-      sendToPanelPair( panelPairId, 0, 2, 1, rowIndex, B00000000, B00000000 );
+      if ( abs( paddleCoords[0][1] - ((byte) ( pongBallZcoord + 0.5 ))) <= 2 )
+      {
+        // Serial.println( "Pong ball hit front paddle!" );
+        rCode = true;
+      }
+    }
+  }
+  else if ( pPosition == 'B' )
+  {
+    if ( abs( paddleCoords[1][0] - ((byte) ( pongBallXcoord + 0.5 ))) <= 2 )
+    {
+      if ( abs( paddleCoords[1][1] - ((byte) ( pongBallZcoord + 0.5 ))) <= 2 )
+      {
+        // Serial.println( "Pong ball hit back paddle!" );
+        rCode = true;
+      }
     }
   }  
-
-  // run the cleaned out frame 0 for a couple of seconds to clean out any lights in the cube.  
-  cycleThroughAnimation( 0,   // pStartFrameIndex
-                         0,   // pEndFrameIndex,
-                         2,   // pAnimationDuration   // how long you want the animation to run in seconds (e.g. 10)
-                         100, // pFrameDuration       // how long each frame should persist in milliseconds (e.g. 100)
-                         -1   // pIterations          // number of iterations from pStartFrameIndex to pEndFrameIndex (-1 indicates NA)
-                        );
-}
-
-void sendToPanelPair( byte pPanelPairId,
-                      byte pFrameIndex,
-                      byte pColorIndex,
-                      byte pPanelIndex,
-                      byte pRowIndex,
-                      byte pData1,
-                      byte pData2
-                    )
-{
-  byte mode = 1;
-
-  Wire.beginTransmission( SLAVE_ADDRESS );
-  Wire.write( mode );
-  Wire.write( pPanelPairId );
-  Wire.write( pFrameIndex );
-  Wire.write( pColorIndex );
-  Wire.write( pPanelIndex );
-  Wire.write( pRowIndex );
-  Wire.write( pData1 );
-  Wire.write( pData2 );
-  Wire.endTransmission();
+  
+  return rCode;
 }
 
 void cycleThroughAnimation( byte pStartFrameIndex,

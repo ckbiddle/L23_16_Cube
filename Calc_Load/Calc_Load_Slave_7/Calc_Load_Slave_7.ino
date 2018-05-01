@@ -1560,7 +1560,7 @@ byte frameIndex = 0;
 byte xCoord = 0;
 byte yCoord = 0;
 byte zCoord = 0;
-
+byte pongMode = B10110000;    // Normal demo mode
 byte frontPaddle_xCoord = 0;
 byte frontPaddle_zCoord = 0;
 byte rearPaddle_xCoord = 0;
@@ -2325,18 +2325,19 @@ void receiveEvent( int howMany )
     // This is what is on the master side for the 3D pong mode. The paddles only
     // need the x an z coordinates. The y coordinates never change, always 0
     // for the front, and 15 for the rear.
-    //
+
     //   Wire.beginTransmission( SLAVE_ADDRESS );
     //   Wire.write( mode );
-    //   Wire.write( xCoord );
-    //   Wire.write( yCoord );
-    //   Wire.write( zCoord );
-    //   Wire.write( frontPaddle_xCoord );  Front paddle x-coordinate
-    //   Wire.write( frontPaddle_zCoord );  Front paddle z-coordinate
-    //   Wire.write( rearPaddle_xCoord );   Rear paddle x-coordinate
-    //   Wire.write( rearPaddle_zCoord );   Rear paddle z-coordinate
+    //   Wire.write((byte) ( pongBallXcoord + 0.5 ));
+    //   Wire.write((byte) ( pongBallYcoord + 0.5 ));
+    //   Wire.write((byte) ( pongBallZcoord + 0.5 ));
+    //   Wire.write( pongMode );
+    //   Wire.write( paddleCoords[0][0] );  Front paddle x-coordinate
+    //   Wire.write( paddleCoords[0][1] );  Front paddle z-coordinate
+    //   Wire.write( paddleCoords[1][0] );  Rear paddle x-coordinate
+    //   Wire.write( paddleCoords[1][1] );  Rear paddle z-coordinate
     //   Wire.endTransmission();
-
+  
     // We're going to borrow frame index 0 of the data buffer so we don't
     // create any more arrays taking up memory. We're going to do a WHITE ball.
     // dataArray[MAX_FRAMES][NUM_COLORS][NUM_PANELS][NUM_ROWS][BYTES_PER_ROW]
@@ -2356,13 +2357,11 @@ void receiveEvent( int howMany )
     xCoord = Wire.read();
     yCoord = Wire.read();
     zCoord = Wire.read();
-
-    /* Not yet    
+    pongMode = Wire.read();
     frontPaddle_xCoord = Wire.read();
     frontPaddle_zCoord = Wire.read();
     rearPaddle_xCoord = Wire.read();
     rearPaddle_zCoord = Wire.read();
-    */
 
     // compute what the y coordinates would be of the two panels in this pair.
     byte yCoordIndex1 = ( PANEL_PAIR_ID - 1 ) * 2;
@@ -2450,9 +2449,87 @@ void receiveEvent( int howMany )
         }
       }
     } // end for ( byte ballZindex = 0; ballZindex < 3; ballZindex++ )
-    
+
+    if ( PANEL_PAIR_ID == 1 )
+    {
+      // render paddle 1 in the frontmost panel (y coordinate 0)
+      renderPaddle( 'F' );
+    }
+    else if ( PANEL_PAIR_ID == 8 )
+    {
+      // render paddle 2 in the rearmost panel (y coordinate 15)
+      renderPaddle( 'B' );
+    }
   } // end else if ( mode == MODE_3D_PONG )
-  
+}
+
+void renderPaddle( char pPosition )  // F for "Front", B for "Back"
+{
+  byte paddleHeight = 4;
+  int rearPaddleZstartIndex = rearPaddle_zCoord - ( paddleHeight / 2 );
+  int frontPaddleZstartIndex = frontPaddle_zCoord - ( paddleHeight / 2 );
+  byte paddleFragment = B11111000;
+
+  if ( pPosition == 'F' )
+  {
+    // Render the paddle in front if in multi-player, single-player, or pong demo mode
+    if ( pongMode == B10010000 || pongMode == B10000000 || pongMode == B10100000 )
+    {
+      for ( int inx = frontPaddleZstartIndex; inx < frontPaddleZstartIndex + paddleHeight + 1; inx++ )
+      {
+        if ( inx >= 0 && inx < NUM_ROWS )
+        {
+          if ( frontPaddle_xCoord - 2 >= 0 )
+          {
+            dataArray[0][1][0][inx][0] = paddleFragment >> ( frontPaddle_xCoord - 2 );
+          }
+          else
+          {
+            dataArray[0][1][0][inx][0] = paddleFragment << ( 2 - frontPaddle_xCoord );
+          }
+
+          if ( 10 - frontPaddle_xCoord >= 0 )
+          {
+            dataArray[0][1][0][inx][1] = paddleFragment << ( 10 - frontPaddle_xCoord );
+          }
+          else
+          {
+            dataArray[0][1][0][inx][1] = paddleFragment >> ( frontPaddle_xCoord - 10 );
+          }
+        }
+      }        
+    }  
+  }  
+  else if ( pPosition == 'B' )
+  {
+    // Only render the paddle in back if in multi-player or pong demo mode
+    if ( pongMode == B10010000 || pongMode == B10100000 )
+    {
+      for ( int inx = rearPaddleZstartIndex; inx < rearPaddleZstartIndex + paddleHeight + 1; inx++ )
+      {
+        if ( inx >= 0 && inx < NUM_ROWS )
+        {
+          if ( rearPaddle_xCoord - 2 >= 0 )
+          {
+            dataArray[0][1][1][inx][0] = paddleFragment >> ( rearPaddle_xCoord - 2 );
+          }
+          else
+          {
+            dataArray[0][1][1][inx][0] = paddleFragment << ( 2 - rearPaddle_xCoord );
+          }
+          
+          if ( 10 - rearPaddle_xCoord >= 0 )
+          {
+            dataArray[0][1][1][inx][1] = paddleFragment << ( 10 - rearPaddle_xCoord );
+          }
+          else
+          {
+            dataArray[0][1][1][inx][1] = paddleFragment >> ( rearPaddle_xCoord - 10 );
+          }
+        }
+      }
+    }
+  }
 }
 
 void shiftInData( int currentFrame )
