@@ -54,6 +54,7 @@
 #define MODE_LOAD_OBRA           26
 #define MODE_3D_PONG             27
 #define MODE_LOAD_KINGS          28
+#define MODE_LOAD_LIGHTWAV       29
 
 const byte interruptReceivePin = 2;
 const byte digitalPinToInterrupt = 0;
@@ -94,8 +95,10 @@ void setup()
 
 void loop()
 {
-  // Some code triggered by the ISR will need to go here to change the
-  // value of pongMode by looking at the four MSBs of the inbound bytes.
+  // The boolean gotNewData gets flagged true by the ISR flagNewData().
+  // That, in turn, prompts the logic for reading serial data being fed
+  // from the controller tied to the Real Sense or joystick component
+  // reading the paddle position.
   
   // pongMode = B10000000;  // single player
   // pongMode = B10010000;  // multi-player
@@ -111,26 +114,6 @@ void loop()
       byte inputData = Serial.read();
 
       parseSerialData( inputData );
-      
-      /*
-      byte dataLabel = inputData >> 4;
-      
-      // if the MSB is 1, then the input data is the pong mode
-      if ( bitRead( dataLabel, 3 ) == 1 )
-      {
-        pongMode = dataLabel;
-      }
-      else if ( dataLabel < 4 )  // if it's a paddle coordinate
-      {
-        // the four LSBs hold the data value
-        byte dataValue = inputData & B00001111;
-        
-        byte inx = bitRead( dataLabel, 0 );
-        byte jnx = bitRead( dataLabel, 1 );
-
-        paddleCoords[jnx][inx] = dataValue;
-      }
-      */
     }
     
     gotNewData = false;
@@ -151,7 +134,12 @@ void loop()
   }
   else
   {
-    if ( !gotNewData )
+    if ( !gotNewData || pongMode == B00001011 )
+    {
+      flashLightWav( 75 );      
+    }
+
+    if ( !gotNewData || pongMode == B00001011 )
     {
       loadHelixAnimation();   // load the first half of the buffer with the helix animation
       
@@ -162,23 +150,160 @@ void loop()
                              -1   // pIterations         // number of iterations from pStartFrameIndex to pEndFrameIndex (-1 indicates NA)
                             );
     }      
-      
-    if ( !gotNewData )
+
+    if ( !gotNewData || pongMode == B00001011 )
+    {
+      flashLightWav( 75 );      
+    }
+
+    if ( !gotNewData || pongMode == B00001011 )
     {    
       loadBlueSineWaves();    // load the second half with the sine wave pattern
       cycleThroughAnimation( 16, 31, 15, 100, -1 );
     }
 
-    if ( !gotNewData )
+    if ( !gotNewData || pongMode == B00001011 )
+    {
+      flashLightWav( 75 );      
+    }
+    
+    if ( !gotNewData || pongMode == B00001011 )
     {
       loadIntersectingPlanes();
       cycleThroughAnimation( 0, 15, 15, 100, -1 );
     }
 
-    if ( !gotNewData )
+    if ( !gotNewData || pongMode == B00001011 )
+    {
+      flashLightWav( 75 );      
+    }
+
+    if ( !gotNewData || pongMode == B00001011 )
     {    
       loadSineWaveRibbons();
       cycleThroughAnimation( 16, 31, 15, 100, -1 );
+    }
+
+    if ( !gotNewData || pongMode == B00001011 )
+    {
+      flashLightWav( 75 );      
+    }
+
+    if ( !gotNewData || pongMode == B00001011 )
+    {    
+      runKineticBall( 15, 50 );
+    }
+
+    if ( !gotNewData || pongMode == B00001011 )
+    {
+      flashLightWav( 75 );      
+    }
+
+    /*
+    if ( !gotNewData && pongMode == B00001011 )
+    {
+      runRunningMan( 30, 50 );
+    }
+
+    if ( !gotNewData && pongMode == B00001011 )
+    {
+      flashLightWav( 75 );      
+    }
+    */
+
+    if ( !gotNewData || pongMode == B00001011 )
+    {
+      loadHorse();
+      cycleThroughAnimation( 0, 14, 20, 75, -1 );
+    }
+
+    if ( !gotNewData || pongMode == B00001011 )
+    {
+      flashLightWav( 75 );      
+    }
+
+    /*
+    if ( !gotNewData && pongMode == B00001011 )
+    {
+      loadHouse();
+      cycleThroughAnimation(  0,  0, 5, 100, -1 );  // display the house in one orientation
+      cycleThroughAnimation(  1,  7, 0, 100,  1 );  // rotate 90 degrees
+      cycleThroughAnimation(  8,  8, 5, 100, -1 );  // hold
+      cycleThroughAnimation(  9, 15, 0, 100,  1 );  // rotate again 90 degrees
+      cycleThroughAnimation( 16, 16, 5, 100, -1 );  // hold
+      cycleThroughAnimation( 17, 23, 0, 100,  1 );  // rotate again 90 degrees
+      cycleThroughAnimation( 24, 24, 5, 100, -1 );  // hold
+      cycleThroughAnimation( 25, 31, 0, 100,  1 );  // rotate again 90 degrees
+      cycleThroughAnimation(  0,  0, 5, 100, -1 );  // hold
+    }
+
+    if ( pongMode == B00001011 )
+    {
+      flashLightWav( 75 );      
+    }
+    */
+
+    if ( !gotNewData || pongMode == B00001011 )
+    {
+      loadTelescopingBoxes();
+      cycleThroughAnimation(  0, 27, 15, 75, -1 );  // hold for three seconds
+    }
+
+    if ( !gotNewData || pongMode == B00001011 )
+    {
+      flashLightWav( 75 );      
+    }
+    
+    if ( !gotNewData || pongMode == B00001011 )
+    {
+      loadDinerEnBlanc();
+      cycleThroughAnimation( 0, 0, 10, 100, -1 );    // hold on the static image for 10 seconds
+      cycleThroughAnimation( 0, 31, 20, 50, 10 );    // cycle through the frames rotating the Eiffel Tower
+    }
+
+    if ( !gotNewData || pongMode == B00001011 )
+    {
+      flashLightWav( 75 );      
+    }
+    
+    if ( !gotNewData || pongMode == B00001011 )
+    {
+      loadWhiteHelix();
+      cycleThroughAnimation( 0, 31, 30, 50, -1 );    // 30 seconds of the helix
+    }
+
+    if ( !gotNewData || pongMode == B00001011 )
+    {
+      flashLightWav( 75 );      
+    }
+
+    if ( !gotNewData || pongMode == B00001011 )
+    {
+      loadWhiteWaves();
+      cycleThroughAnimation( 16, 31, 30, 100, -1 );   // 30 seconds of the waves
+    }
+
+    if ( !gotNewData || pongMode == B00001011 )
+    {
+      flashLightWav( 75 );      
+    }
+
+    if ( !gotNewData || pongMode == B00001011 )
+    {  
+      cleanOutCube();
+      runWhiteBall( 30, 25 );
+    }
+
+    if ( !gotNewData || pongMode == B00001011 )
+    {
+      flashLightWav( 75 );      
+    }
+
+    if ( !gotNewData || pongMode == B00001011 )
+    {  
+      loadJewel();
+      cycleThroughAnimation(  0,  0,  3, 100, -1 );    //  3 seconds of the jewel holding still
+      cycleThroughAnimation(  0, 31, 15, 100, -1 );    // 15 seconds of the jewel rotating
     }
   }
 }
@@ -399,6 +524,300 @@ boolean pongBallHitPaddle( char pPosition )
   }  
   
   return rCode;
+}
+
+void runKineticBall( int pMovieDurationSeconds,
+                     int pFrameDurationMillis
+                   )
+{
+  byte mode = MODE_RUN_KINETIC_BALL;
+  float xCoord = 2.0;
+  float yCoord = 2.0;
+  float zCoord = 2.0;
+  float xVelocity = 1.0;
+  float yVelocity = 0.5;
+  float zVelocity = 0.75;
+  int maxIterations = (int) ( pMovieDurationSeconds * 1000 / pFrameDurationMillis );
+
+  for ( int inx = 0; inx < maxIterations; inx++ )
+  {
+    Wire.beginTransmission( SLAVE_ADDRESS );
+    Wire.write( mode );
+    Wire.write((byte) ( xCoord + 0.5 ));
+    Wire.write((byte) ( yCoord + 0.5 ));
+    Wire.write((byte) ( zCoord + 0.5 ));
+    Wire.endTransmission();
+
+    if ( xCoord >= 13.0 )
+    {
+      xVelocity = abs( xVelocity ) * (-1.0);
+    }
+    else if ( xCoord <= 2.0 )
+    {
+      xVelocity = abs( xVelocity );
+    }    
+    
+    if ( yCoord >= 13.0 )
+    {
+      yVelocity = abs( yVelocity ) * (-1.0);      
+    }
+    else if ( yCoord <= 2.0 )
+    {
+      yVelocity = abs( yVelocity );      
+    }
+    
+    if ( zCoord >= 13.0 )
+    {
+      zVelocity = abs( zVelocity ) * (-1.0);
+    }
+    else if ( zCoord <= 2.0 )
+    {
+      zVelocity = abs( zVelocity );
+    }
+
+    xCoord = xCoord + xVelocity;
+    yCoord = yCoord + yVelocity;
+    zCoord = zCoord + zVelocity;
+
+    delay( pFrameDurationMillis );
+  }  
+}
+
+void runRunningMan( int pMovieDurationSeconds,
+                    int pFrameDurationMillis
+                  )
+{
+  byte mode = 4;   // load running man
+
+  Wire.beginTransmission( SLAVE_ADDRESS );
+  Wire.write( mode );
+  Wire.endTransmission();
+
+  delay( 1000 );  // allow a second for array buffer on slaves to load data
+  
+  int maxIterations = (int) ( pMovieDurationSeconds * 1000 / pFrameDurationMillis );
+
+  mode = 2;    // standard play mode
+
+  byte frameNumber = 0;
+
+  for ( int inx = 0; inx < maxIterations; inx++ )
+  {
+    if ( frameNumber == MAX_FRAMES )
+    {
+      frameNumber = 0;
+    }
+
+    Wire.beginTransmission( SLAVE_ADDRESS );
+    Wire.write( mode );
+    Wire.write( frameNumber );
+    Wire.endTransmission();
+      
+    delay( pFrameDurationMillis );      
+
+    frameNumber++;
+  }    
+}
+
+void flashLightWav( int pFrameDurationMillis )
+{
+  byte mode = MODE_LOAD_LIGHTWAV;
+
+  Wire.beginTransmission( SLAVE_ADDRESS );
+  Wire.write( mode );
+  Wire.endTransmission();
+
+  delay( 1000 );  // allow a second for array buffer on slaves to load data
+  
+  // Start to scroll the "LIGHT.WAV" lettering across the front of
+  // the cube from right to left. This will take 80 frames, 64 frames
+  // spanning the lettering itself plus 16 blank "follow up" frames to scroll
+  // the lettering completely off the cube.
+
+  mode = MODE_SCROLL_RIGHT_LEFT;
+
+  // Setting the panel pair ID to 0 vs. setting it to 1, 2 ... 8 will
+  // cause the scrolling logic to happen in all the panel pairs, not just
+  // isolated to one panel pair. Initially, I intended to have each panel
+  // pair contain the same data to scroll. Then, by specifying the panel
+  // pair ID 1, 2, 3 ... 8, you could scroll that lettering across
+  // whichever panel pair you choose, but you were limited to scrolling a
+  // single panel pair. I later added this 0 as an option to allow the
+  // scrolling to occur across all panel pairs. What you want to scroll
+  // in each panel pair in that case will depend on what data you store
+  // in that panel pair.
+  
+  byte panelPair = 0;
+
+  for ( byte rtolFrmNbr = 0; rtolFrmNbr < 80; rtolFrmNbr++ )
+  {
+    Wire.beginTransmission( SLAVE_ADDRESS );
+    Wire.write( mode );
+    Wire.write( panelPair );
+    Wire.write( rtolFrmNbr );
+    Wire.endTransmission();
+
+    delay( pFrameDurationMillis );
+  }
+}
+
+void loadHorse()
+{
+  byte mode = MODE_LOAD_HORSE;
+
+  Wire.beginTransmission( SLAVE_ADDRESS );
+  Wire.write( mode );
+  Wire.endTransmission();  
+}
+
+void loadHouse()
+{
+  byte mode = MODE_LOAD_HOUSE;
+
+  Wire.beginTransmission( SLAVE_ADDRESS );
+  Wire.write( mode );
+  Wire.endTransmission();  
+}
+
+void loadTelescopingBoxes()
+{
+  byte mode = MODE_LOAD_TEL_BOXES;
+  
+  Wire.beginTransmission( SLAVE_ADDRESS );
+  Wire.write( mode );
+  Wire.endTransmission();  
+}
+
+void loadDinerEnBlanc()
+{
+  byte mode = MODE_LOAD_DINER_EN_BLANC;  
+
+  Wire.beginTransmission( SLAVE_ADDRESS );
+  Wire.write( mode );
+  Wire.endTransmission();  
+}
+
+void loadWhiteHelix()
+{
+  byte mode = MODE_LOAD_WHITE_HELIX;  
+
+  Wire.beginTransmission( SLAVE_ADDRESS );
+  Wire.write( mode );
+  Wire.endTransmission();  
+}
+
+void loadWhiteWaves()
+{
+  byte mode = MODE_LOAD_WHITE_WAVES;  
+
+  Wire.beginTransmission( SLAVE_ADDRESS );
+  Wire.write( mode );
+  Wire.endTransmission();  
+}
+
+void loadJewel()
+{
+  byte mode = MODE_LOAD_JEWEL;  
+
+  Wire.beginTransmission( SLAVE_ADDRESS );
+  Wire.write( mode );
+  Wire.endTransmission();  
+}
+
+void runWhiteBall( int pMovieDurationSeconds,
+                     int pFrameDurationMillis
+                   )
+{
+  byte mode = MODE_RUN_WHITE_BALL;
+  float xCoord = 2.0;
+  float yCoord = 2.0;
+  float zCoord = 2.0;
+  float xVelocity = 1.0;
+  float yVelocity = 0.5;
+  float zVelocity = 0.75;
+  int maxIterations = (int) ( pMovieDurationSeconds * 1000 / pFrameDurationMillis );
+
+  for ( int inx = 0; inx < maxIterations; inx++ )
+  {
+    Wire.beginTransmission( SLAVE_ADDRESS );
+    Wire.write( mode );
+    Wire.write((byte) ( xCoord + 0.5 ));
+    Wire.write((byte) ( yCoord + 0.5 ));
+    Wire.write((byte) ( zCoord + 0.5 ));
+    Wire.endTransmission();
+
+    if ( xCoord >= 13.0 )
+    {
+      xVelocity = abs( xVelocity ) * (-1.0);
+    }
+    else if ( xCoord <= 2.0 )
+    {
+      xVelocity = abs( xVelocity );
+    }    
+    
+    if ( yCoord >= 13.0 )
+    {
+      yVelocity = abs( yVelocity ) * (-1.0);      
+    }
+    else if ( yCoord <= 2.0 )
+    {
+      yVelocity = abs( yVelocity );      
+    }
+    
+    if ( zCoord >= 13.0 )
+    {
+      zVelocity = abs( zVelocity ) * (-1.0);
+    }
+    else if ( zCoord <= 2.0 )
+    {
+      zVelocity = abs( zVelocity );
+    }
+
+    xCoord = xCoord + xVelocity;
+    yCoord = yCoord + yVelocity;
+    zCoord = zCoord + zVelocity;
+
+    delay( pFrameDurationMillis );
+  }  
+}
+
+void cleanOutCube()
+{
+  for ( byte panelPairId = 1; panelPairId <= 8; panelPairId++ )
+  {
+    for ( byte rowIndex = 0; rowIndex < NUM_ROWS; rowIndex++ )
+    {
+      sendToPanelPair( panelPairId, 0, 0, 0, rowIndex, B00000000, B00000000 );
+      sendToPanelPair( panelPairId, 0, 0, 1, rowIndex, B00000000, B00000000 );
+      sendToPanelPair( panelPairId, 0, 1, 0, rowIndex, B00000000, B00000000 );
+      sendToPanelPair( panelPairId, 0, 1, 1, rowIndex, B00000000, B00000000 );
+      sendToPanelPair( panelPairId, 0, 2, 0, rowIndex, B00000000, B00000000 );
+      sendToPanelPair( panelPairId, 0, 2, 1, rowIndex, B00000000, B00000000 );
+    }
+  }  
+}
+
+void sendToPanelPair( byte pPanelPairId,
+                      byte pFrameIndex,
+                      byte pColorIndex,
+                      byte pPanelIndex,
+                      byte pRowIndex,
+                      byte pData1,
+                      byte pData2
+                    )
+{
+  byte mode = 1;
+
+  Wire.beginTransmission( SLAVE_ADDRESS );
+  Wire.write( mode );
+  Wire.write( pPanelPairId );
+  Wire.write( pFrameIndex );
+  Wire.write( pColorIndex );
+  Wire.write( pPanelIndex );
+  Wire.write( pRowIndex );
+  Wire.write( pData1 );
+  Wire.write( pData2 );
+  Wire.endTransmission();
 }
 
 void cycleThroughAnimation( byte pStartFrameIndex,

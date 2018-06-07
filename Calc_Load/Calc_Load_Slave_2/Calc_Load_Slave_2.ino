@@ -84,6 +84,7 @@
 #define MODE_LOAD_OBRA           26
 #define MODE_3D_PONG             27
 #define MODE_LOAD_KINGS          28
+#define MODE_LOAD_LIGHTWAV       29
 
 #define LAYER_PHASE_CORRECTION 1
 
@@ -2231,6 +2232,10 @@ void receiveEvent( int howMany )
   else if ( mode == MODE_LOAD_OBRA )
   {
     loadObra();    
+  }
+  else if ( mode == MODE_LOAD_LIGHTWAV )
+  {
+    loadLightWav();    
   }
   else if ( mode == MODE_3D_PONG )
   {
@@ -7795,6 +7800,254 @@ void loadIdeasActivated()
   dataArray[12][2][0][1][0]  = B00000000; dataArray[12][2][0][1][1]  = B00000000; dataArray[12][2][1][1][0]  = B00000000; dataArray[12][2][1][1][1]  = B00000000;
   dataArray[12][2][0][0][0]  = B00000000; dataArray[12][2][0][0][1]  = B00000000; dataArray[12][2][1][0][0]  = B00000000; dataArray[12][2][1][0][1]  = B00000000;
 
+}
+
+void loadLightWav()
+{
+  // Unlike some of the other logos, for "LIGHT.WAV", each panel pair will have a different animation:
+  //   Panels 1 and 2 will contain nothing.
+  //   Panel 3 will contain "LIGHT.WAV" lettering in white.
+  //   Panels 4 and 5 will contain "LIGHT.WAV" in blue.
+  //   Panels 6, 7 and 8 will contain nothing.
+  // This will give us blue lettering "iced" in the front with white. It will dazzle!
+  
+  // dataArray[MAX_FRAMES][NUM_COLORS][NUM_PANELS][NUM_ROWS][BYTES_PER_ROW]
+
+  // clear out any crap that was in there
+  for ( byte frameInx = 0; frameInx < MAX_FRAMES; frameInx++ )
+  {
+    for ( byte colorInx = 0; colorInx < NUM_COLORS; colorInx++ )
+    {
+      for ( byte panelInx = 0; panelInx < NUM_PANELS; panelInx++ )
+      {
+        for ( byte rowInx = 0; rowInx < NUM_ROWS; rowInx++ )
+        {
+          dataArray[frameInx][colorInx][panelInx][rowInx][0] = B00000000;
+          dataArray[frameInx][colorInx][panelInx][rowInx][1] = B00000000;
+        }
+      }
+    }
+  }
+
+  // LIGHT.WAV text
+  
+  // This is panel 2, so it contains NOTHING!
+
+  // Frame: 3 (LIGHT.WAV text, Part 1) / Color: RED
+  dataArray[3][0][0][15][0] = B00000000; dataArray[3][0][0][15][1] = B00000000; dataArray[3][0][1][15][0] = B00000000; dataArray[3][0][1][15][1] = B00000000;
+  dataArray[3][0][0][14][0] = B00000000; dataArray[3][0][0][14][1] = B00000000; dataArray[3][0][1][14][0] = B00000000; dataArray[3][0][1][14][1] = B00000000;
+  dataArray[3][0][0][13][0] = B00000000; dataArray[3][0][0][13][1] = B00000000; dataArray[3][0][1][13][0] = B00000000; dataArray[3][0][1][13][1] = B00000000;
+  dataArray[3][0][0][12][0] = B00000000; dataArray[3][0][0][12][1] = B00000000; dataArray[3][0][1][12][0] = B00000000; dataArray[3][0][1][12][1] = B00000000;
+  dataArray[3][0][0][11][0] = B00000000; dataArray[3][0][0][11][1] = B00000000; dataArray[3][0][1][11][0] = B00000000; dataArray[3][0][1][11][1] = B00000000;
+  dataArray[3][0][0][10][0] = B00000000; dataArray[3][0][0][10][1] = B00000000; dataArray[3][0][1][10][0] = B00000000; dataArray[3][0][1][10][1] = B00000000;
+  dataArray[3][0][0][9][0]  = B00000000; dataArray[3][0][0][9][1]  = B00000000; dataArray[3][0][1][9][0]  = B00000000; dataArray[3][0][1][9][1]  = B00000000;
+  dataArray[3][0][0][8][0]  = B00000000; dataArray[3][0][0][8][1]  = B00000000; dataArray[3][0][1][8][0]  = B00000000; dataArray[3][0][1][8][1]  = B00000000;
+  dataArray[3][0][0][7][0]  = B00000000; dataArray[3][0][0][7][1]  = B00000000; dataArray[3][0][1][7][0]  = B00000000; dataArray[3][0][1][7][1]  = B00000000;
+  dataArray[3][0][0][6][0]  = B00000000; dataArray[3][0][0][6][1]  = B00000000; dataArray[3][0][1][6][0]  = B00000000; dataArray[3][0][1][6][1]  = B00000000;
+  dataArray[3][0][0][5][0]  = B00000000; dataArray[3][0][0][5][1]  = B00000000; dataArray[3][0][1][5][0]  = B00000000; dataArray[3][0][1][5][1]  = B00000000;
+  dataArray[3][0][0][4][0]  = B00000000; dataArray[3][0][0][4][1]  = B00000000; dataArray[3][0][1][4][0]  = B00000000; dataArray[3][0][1][4][1]  = B00000000;
+  dataArray[3][0][0][3][0]  = B00000000; dataArray[3][0][0][3][1]  = B00000000; dataArray[3][0][1][3][0]  = B00000000; dataArray[3][0][1][3][1]  = B00000000;
+  dataArray[3][0][0][2][0]  = B00000000; dataArray[3][0][0][2][1]  = B00000000; dataArray[3][0][1][2][0]  = B00000000; dataArray[3][0][1][2][1]  = B00000000;
+  dataArray[3][0][0][1][0]  = B00000000; dataArray[3][0][0][1][1]  = B00000000; dataArray[3][0][1][1][0]  = B00000000; dataArray[3][0][1][1][1]  = B00000000;
+  dataArray[3][0][0][0][0]  = B00000000; dataArray[3][0][0][0][1]  = B00000000; dataArray[3][0][1][0][0]  = B00000000; dataArray[3][0][1][0][1]  = B00000000;
+  
+  // Frame: 3 (LIGHT.WAV text, Part 1) / Color: GREEN
+  dataArray[3][1][0][15][0] = B00000000; dataArray[3][1][0][15][1] = B00000000; dataArray[3][1][1][15][0] = B00000000; dataArray[3][1][1][15][1] = B00000000;
+  dataArray[3][1][0][14][0] = B00000000; dataArray[3][1][0][14][1] = B00000000; dataArray[3][1][1][14][0] = B00000000; dataArray[3][1][1][14][1] = B00000000;
+  dataArray[3][1][0][13][0] = B00000000; dataArray[3][1][0][13][1] = B00000000; dataArray[3][1][1][13][0] = B00000000; dataArray[3][1][1][13][1] = B00000000;
+  dataArray[3][1][0][12][0] = B00000000; dataArray[3][1][0][12][1] = B00000000; dataArray[3][1][1][12][0] = B00000000; dataArray[3][1][1][12][1] = B00000000;
+  dataArray[3][1][0][11][0] = B00000000; dataArray[3][1][0][11][1] = B00000000; dataArray[3][1][1][11][0] = B00000000; dataArray[3][1][1][11][1] = B00000000;
+  dataArray[3][1][0][10][0] = B00000000; dataArray[3][1][0][10][1] = B00000000; dataArray[3][1][1][10][0] = B00000000; dataArray[3][1][1][10][1] = B00000000;
+  dataArray[3][1][0][9][0]  = B00000000; dataArray[3][1][0][9][1]  = B00000000; dataArray[3][1][1][9][0]  = B00000000; dataArray[3][1][1][9][1]  = B00000000;
+  dataArray[3][1][0][8][0]  = B00000000; dataArray[3][1][0][8][1]  = B00000000; dataArray[3][1][1][8][0]  = B00000000; dataArray[3][1][1][8][1]  = B00000000;
+  dataArray[3][1][0][7][0]  = B00000000; dataArray[3][1][0][7][1]  = B00000000; dataArray[3][1][1][7][0]  = B00000000; dataArray[3][1][1][7][1]  = B00000000;
+  dataArray[3][1][0][6][0]  = B00000000; dataArray[3][1][0][6][1]  = B00000000; dataArray[3][1][1][6][0]  = B00000000; dataArray[3][1][1][6][1]  = B00000000;
+  dataArray[3][1][0][5][0]  = B00000000; dataArray[3][1][0][5][1]  = B00000000; dataArray[3][1][1][5][0]  = B00000000; dataArray[3][1][1][5][1]  = B00000000;
+  dataArray[3][1][0][4][0]  = B00000000; dataArray[3][1][0][4][1]  = B00000000; dataArray[3][1][1][4][0]  = B00000000; dataArray[3][1][1][4][1]  = B00000000;
+  dataArray[3][1][0][3][0]  = B00000000; dataArray[3][1][0][3][1]  = B00000000; dataArray[3][1][1][3][0]  = B00000000; dataArray[3][1][1][3][1]  = B00000000;
+  dataArray[3][1][0][2][0]  = B00000000; dataArray[3][1][0][2][1]  = B00000000; dataArray[3][1][1][2][0]  = B00000000; dataArray[3][1][1][2][1]  = B00000000;
+  dataArray[3][1][0][1][0]  = B00000000; dataArray[3][1][0][1][1]  = B00000000; dataArray[3][1][1][1][0]  = B00000000; dataArray[3][1][1][1][1]  = B00000000;
+  dataArray[3][1][0][0][0]  = B00000000; dataArray[3][1][0][0][1]  = B00000000; dataArray[3][1][1][0][0]  = B00000000; dataArray[3][1][1][0][1]  = B00000000;
+  
+  // Frame: 3 (LIGHT.WAV text, Part 1) / Color: BLUE
+  dataArray[3][2][0][15][0] = B00000000; dataArray[3][2][0][15][1] = B00000000; dataArray[3][2][1][15][0] = B00000000; dataArray[3][2][1][15][1] = B00000000;
+  dataArray[3][2][0][14][0] = B00000000; dataArray[3][2][0][14][1] = B00000000; dataArray[3][2][1][14][0] = B00000000; dataArray[3][2][1][14][1] = B00000000;
+  dataArray[3][2][0][13][0] = B00000000; dataArray[3][2][0][13][1] = B00000000; dataArray[3][2][1][13][0] = B00000000; dataArray[3][2][1][13][1] = B00000000;
+  dataArray[3][2][0][12][0] = B00000000; dataArray[3][2][0][12][1] = B00000000; dataArray[3][2][1][12][0] = B00000000; dataArray[3][2][1][12][1] = B00000000;
+  dataArray[3][2][0][11][0] = B00000000; dataArray[3][2][0][11][1] = B00000000; dataArray[3][2][1][11][0] = B00000000; dataArray[3][2][1][11][1] = B00000000;
+  dataArray[3][2][0][10][0] = B00000000; dataArray[3][2][0][10][1] = B00000000; dataArray[3][2][1][10][0] = B00000000; dataArray[3][2][1][10][1] = B00000000;
+  dataArray[3][2][0][9][0]  = B00000000; dataArray[3][2][0][9][1]  = B00000000; dataArray[3][2][1][9][0]  = B00000000; dataArray[3][2][1][9][1]  = B00000000;
+  dataArray[3][2][0][8][0]  = B00000000; dataArray[3][2][0][8][1]  = B00000000; dataArray[3][2][1][8][0]  = B00000000; dataArray[3][2][1][8][1]  = B00000000;
+  dataArray[3][2][0][7][0]  = B00000000; dataArray[3][2][0][7][1]  = B00000000; dataArray[3][2][1][7][0]  = B00000000; dataArray[3][2][1][7][1]  = B00000000;
+  dataArray[3][2][0][6][0]  = B00000000; dataArray[3][2][0][6][1]  = B00000000; dataArray[3][2][1][6][0]  = B00000000; dataArray[3][2][1][6][1]  = B00000000;
+  dataArray[3][2][0][5][0]  = B00000000; dataArray[3][2][0][5][1]  = B00000000; dataArray[3][2][1][5][0]  = B00000000; dataArray[3][2][1][5][1]  = B00000000;
+  dataArray[3][2][0][4][0]  = B00000000; dataArray[3][2][0][4][1]  = B00000000; dataArray[3][2][1][4][0]  = B00000000; dataArray[3][2][1][4][1]  = B00000000;
+  dataArray[3][2][0][3][0]  = B00000000; dataArray[3][2][0][3][1]  = B00000000; dataArray[3][2][1][3][0]  = B00000000; dataArray[3][2][1][3][1]  = B00000000;
+  dataArray[3][2][0][2][0]  = B00000000; dataArray[3][2][0][2][1]  = B00000000; dataArray[3][2][1][2][0]  = B00000000; dataArray[3][2][1][2][1]  = B00000000;
+  dataArray[3][2][0][1][0]  = B00000000; dataArray[3][2][0][1][1]  = B00000000; dataArray[3][2][1][1][0]  = B00000000; dataArray[3][2][1][1][1]  = B00000000;
+  dataArray[3][2][0][0][0]  = B00000000; dataArray[3][2][0][0][1]  = B00000000; dataArray[3][2][1][0][0]  = B00000000; dataArray[3][2][1][0][1]  = B00000000;
+
+  // Frame: 4 (LIGHT.WAV text, Part 2) / Color: RED
+  dataArray[4][0][0][15][0] = B00000000; dataArray[4][0][0][15][1] = B00000000; dataArray[4][0][1][15][0] = B00000000; dataArray[4][0][1][15][1] = B00000000;
+  dataArray[4][0][0][14][0] = B00000000; dataArray[4][0][0][14][1] = B00000000; dataArray[4][0][1][14][0] = B00000000; dataArray[4][0][1][14][1] = B00000000;
+  dataArray[4][0][0][13][0] = B00000000; dataArray[4][0][0][13][1] = B00000000; dataArray[4][0][1][13][0] = B00000000; dataArray[4][0][1][13][1] = B00000000;
+  dataArray[4][0][0][12][0] = B00000000; dataArray[4][0][0][12][1] = B00000000; dataArray[4][0][1][12][0] = B00000000; dataArray[4][0][1][12][1] = B00000000;
+  dataArray[4][0][0][11][0] = B00000000; dataArray[4][0][0][11][1] = B00000000; dataArray[4][0][1][11][0] = B00000000; dataArray[4][0][1][11][1] = B00000000;
+  dataArray[4][0][0][10][0] = B00000000; dataArray[4][0][0][10][1] = B00000000; dataArray[4][0][1][10][0] = B00000000; dataArray[4][0][1][10][1] = B00000000;
+  dataArray[4][0][0][9][0]  = B00000000; dataArray[4][0][0][9][1]  = B00000000; dataArray[4][0][1][9][0]  = B00000000; dataArray[4][0][1][9][1]  = B00000000;
+  dataArray[4][0][0][8][0]  = B00000000; dataArray[4][0][0][8][1]  = B00000000; dataArray[4][0][1][8][0]  = B00000000; dataArray[4][0][1][8][1]  = B00000000;
+  dataArray[4][0][0][7][0]  = B00000000; dataArray[4][0][0][7][1]  = B00000000; dataArray[4][0][1][7][0]  = B00000000; dataArray[4][0][1][7][1]  = B00000000;
+  dataArray[4][0][0][6][0]  = B00000000; dataArray[4][0][0][6][1]  = B00000000; dataArray[4][0][1][6][0]  = B00000000; dataArray[4][0][1][6][1]  = B00000000;
+  dataArray[4][0][0][5][0]  = B00000000; dataArray[4][0][0][5][1]  = B00000000; dataArray[4][0][1][5][0]  = B00000000; dataArray[4][0][1][5][1]  = B00000000;
+  dataArray[4][0][0][4][0]  = B00000000; dataArray[4][0][0][4][1]  = B00000000; dataArray[4][0][1][4][0]  = B00000000; dataArray[4][0][1][4][1]  = B00000000;
+  dataArray[4][0][0][3][0]  = B00000000; dataArray[4][0][0][3][1]  = B00000000; dataArray[4][0][1][3][0]  = B00000000; dataArray[4][0][1][3][1]  = B00000000;
+  dataArray[4][0][0][2][0]  = B00000000; dataArray[4][0][0][2][1]  = B00000000; dataArray[4][0][1][2][0]  = B00000000; dataArray[4][0][1][2][1]  = B00000000;
+  dataArray[4][0][0][1][0]  = B00000000; dataArray[4][0][0][1][1]  = B00000000; dataArray[4][0][1][1][0]  = B00000000; dataArray[4][0][1][1][1]  = B00000000;
+  dataArray[4][0][0][0][0]  = B00000000; dataArray[4][0][0][0][1]  = B00000000; dataArray[4][0][1][0][0]  = B00000000; dataArray[4][0][1][0][1]  = B00000000;
+  
+  // Frame: 4 (LIGHT.WAV text, Part 2) / Color: GREEN
+  dataArray[4][1][0][15][0] = B00000000; dataArray[4][1][0][15][1] = B00000000; dataArray[4][1][1][15][0] = B00000000; dataArray[4][1][1][15][1] = B00000000;
+  dataArray[4][1][0][14][0] = B00000000; dataArray[4][1][0][14][1] = B00000000; dataArray[4][1][1][14][0] = B00000000; dataArray[4][1][1][14][1] = B00000000;
+  dataArray[4][1][0][13][0] = B00000000; dataArray[4][1][0][13][1] = B00000000; dataArray[4][1][1][13][0] = B00000000; dataArray[4][1][1][13][1] = B00000000;
+  dataArray[4][1][0][12][0] = B00000000; dataArray[4][1][0][12][1] = B00000000; dataArray[4][1][1][12][0] = B00000000; dataArray[4][1][1][12][1] = B00000000;
+  dataArray[4][1][0][11][0] = B00000000; dataArray[4][1][0][11][1] = B00000000; dataArray[4][1][1][11][0] = B00000000; dataArray[4][1][1][11][1] = B00000000;
+  dataArray[4][1][0][10][0] = B00000000; dataArray[4][1][0][10][1] = B00000000; dataArray[4][1][1][10][0] = B00000000; dataArray[4][1][1][10][1] = B00000000;
+  dataArray[4][1][0][9][0]  = B00000000; dataArray[4][1][0][9][1]  = B00000000; dataArray[4][1][1][9][0]  = B00000000; dataArray[4][1][1][9][1]  = B00000000;
+  dataArray[4][1][0][8][0]  = B00000000; dataArray[4][1][0][8][1]  = B00000000; dataArray[4][1][1][8][0]  = B00000000; dataArray[4][1][1][8][1]  = B00000000;
+  dataArray[4][1][0][7][0]  = B00000000; dataArray[4][1][0][7][1]  = B00000000; dataArray[4][1][1][7][0]  = B00000000; dataArray[4][1][1][7][1]  = B00000000;
+  dataArray[4][1][0][6][0]  = B00000000; dataArray[4][1][0][6][1]  = B00000000; dataArray[4][1][1][6][0]  = B00000000; dataArray[4][1][1][6][1]  = B00000000;
+  dataArray[4][1][0][5][0]  = B00000000; dataArray[4][1][0][5][1]  = B00000000; dataArray[4][1][1][5][0]  = B00000000; dataArray[4][1][1][5][1]  = B00000000;
+  dataArray[4][1][0][4][0]  = B00000000; dataArray[4][1][0][4][1]  = B00000000; dataArray[4][1][1][4][0]  = B00000000; dataArray[4][1][1][4][1]  = B00000000;
+  dataArray[4][1][0][3][0]  = B00000000; dataArray[4][1][0][3][1]  = B00000000; dataArray[4][1][1][3][0]  = B00000000; dataArray[4][1][1][3][1]  = B00000000;
+  dataArray[4][1][0][2][0]  = B00000000; dataArray[4][1][0][2][1]  = B00000000; dataArray[4][1][1][2][0]  = B00000000; dataArray[4][1][1][2][1]  = B00000000;
+  dataArray[4][1][0][1][0]  = B00000000; dataArray[4][1][0][1][1]  = B00000000; dataArray[4][1][1][1][0]  = B00000000; dataArray[4][1][1][1][1]  = B00000000;
+  dataArray[4][1][0][0][0]  = B00000000; dataArray[4][1][0][0][1]  = B00000000; dataArray[4][1][1][0][0]  = B00000000; dataArray[4][1][1][0][1]  = B00000000;
+  
+  // Frame: 4 (LIGHT.WAV text, Part 2) / Color: BLUE
+  dataArray[4][2][0][15][0] = B00000000; dataArray[4][2][0][15][1] = B00000000; dataArray[4][2][1][15][0] = B00000000; dataArray[4][2][1][15][1] = B00000000;
+  dataArray[4][2][0][14][0] = B00000000; dataArray[4][2][0][14][1] = B00000000; dataArray[4][2][1][14][0] = B00000000; dataArray[4][2][1][14][1] = B00000000;
+  dataArray[4][2][0][13][0] = B00000000; dataArray[4][2][0][13][1] = B00000000; dataArray[4][2][1][13][0] = B00000000; dataArray[4][2][1][13][1] = B00000000;
+  dataArray[4][2][0][12][0] = B00000000; dataArray[4][2][0][12][1] = B00000000; dataArray[4][2][1][12][0] = B00000000; dataArray[4][2][1][12][1] = B00000000;
+  dataArray[4][2][0][11][0] = B00000000; dataArray[4][2][0][11][1] = B00000000; dataArray[4][2][1][11][0] = B00000000; dataArray[4][2][1][11][1] = B00000000;
+  dataArray[4][2][0][10][0] = B00000000; dataArray[4][2][0][10][1] = B00000000; dataArray[4][2][1][10][0] = B00000000; dataArray[4][2][1][10][1] = B00000000;
+  dataArray[4][2][0][9][0]  = B00000000; dataArray[4][2][0][9][1]  = B00000000; dataArray[4][2][1][9][0]  = B00000000; dataArray[4][2][1][9][1]  = B00000000;
+  dataArray[4][2][0][8][0]  = B00000000; dataArray[4][2][0][8][1]  = B00000000; dataArray[4][2][1][8][0]  = B00000000; dataArray[4][2][1][8][1]  = B00000000;
+  dataArray[4][2][0][7][0]  = B00000000; dataArray[4][2][0][7][1]  = B00000000; dataArray[4][2][1][7][0]  = B00000000; dataArray[4][2][1][7][1]  = B00000000;
+  dataArray[4][2][0][6][0]  = B00000000; dataArray[4][2][0][6][1]  = B00000000; dataArray[4][2][1][6][0]  = B00000000; dataArray[4][2][1][6][1]  = B00000000;
+  dataArray[4][2][0][5][0]  = B00000000; dataArray[4][2][0][5][1]  = B00000000; dataArray[4][2][1][5][0]  = B00000000; dataArray[4][2][1][5][1]  = B00000000;
+  dataArray[4][2][0][4][0]  = B00000000; dataArray[4][2][0][4][1]  = B00000000; dataArray[4][2][1][4][0]  = B00000000; dataArray[4][2][1][4][1]  = B00000000;
+  dataArray[4][2][0][3][0]  = B00000000; dataArray[4][2][0][3][1]  = B00000000; dataArray[4][2][1][3][0]  = B00000000; dataArray[4][2][1][3][1]  = B00000000;
+  dataArray[4][2][0][2][0]  = B00000000; dataArray[4][2][0][2][1]  = B00000000; dataArray[4][2][1][2][0]  = B00000000; dataArray[4][2][1][2][1]  = B00000000;
+  dataArray[4][2][0][1][0]  = B00000000; dataArray[4][2][0][1][1]  = B00000000; dataArray[4][2][1][1][0]  = B00000000; dataArray[4][2][1][1][1]  = B00000000;
+  dataArray[4][2][0][0][0]  = B00000000; dataArray[4][2][0][0][1]  = B00000000; dataArray[4][2][1][0][0]  = B00000000; dataArray[4][2][1][0][1]  = B00000000;
+  
+  // Frame: 5 (LIGHT.WAV text, Part 3) / Color: RED
+  dataArray[5][0][0][15][0] = B00000000; dataArray[5][0][0][15][1] = B00000000; dataArray[5][0][1][15][0] = B00000000; dataArray[5][0][1][15][1] = B00000000;
+  dataArray[5][0][0][14][0] = B00000000; dataArray[5][0][0][14][1] = B00000000; dataArray[5][0][1][14][0] = B00000000; dataArray[5][0][1][14][1] = B00000000;
+  dataArray[5][0][0][13][0] = B00000000; dataArray[5][0][0][13][1] = B00000000; dataArray[5][0][1][13][0] = B00000000; dataArray[5][0][1][13][1] = B00000000;
+  dataArray[5][0][0][12][0] = B00000000; dataArray[5][0][0][12][1] = B00000000; dataArray[5][0][1][12][0] = B00000000; dataArray[5][0][1][12][1] = B00000000;
+  dataArray[5][0][0][11][0] = B00000000; dataArray[5][0][0][11][1] = B00000000; dataArray[5][0][1][11][0] = B00000000; dataArray[5][0][1][11][1] = B00000000;
+  dataArray[5][0][0][10][0] = B00000000; dataArray[5][0][0][10][1] = B00000000; dataArray[5][0][1][10][0] = B00000000; dataArray[5][0][1][10][1] = B00000000;
+  dataArray[5][0][0][9][0]  = B00000000; dataArray[5][0][0][9][1]  = B00000000; dataArray[5][0][1][9][0]  = B00000000; dataArray[5][0][1][9][1]  = B00000000;
+  dataArray[5][0][0][8][0]  = B00000000; dataArray[5][0][0][8][1]  = B00000000; dataArray[5][0][1][8][0]  = B00000000; dataArray[5][0][1][8][1]  = B00000000;
+  dataArray[5][0][0][7][0]  = B00000000; dataArray[5][0][0][7][1]  = B00000000; dataArray[5][0][1][7][0]  = B00000000; dataArray[5][0][1][7][1]  = B00000000;
+  dataArray[5][0][0][6][0]  = B00000000; dataArray[5][0][0][6][1]  = B00000000; dataArray[5][0][1][6][0]  = B00000000; dataArray[5][0][1][6][1]  = B00000000;
+  dataArray[5][0][0][5][0]  = B00000000; dataArray[5][0][0][5][1]  = B00000000; dataArray[5][0][1][5][0]  = B00000000; dataArray[5][0][1][5][1]  = B00000000;
+  dataArray[5][0][0][4][0]  = B00000000; dataArray[5][0][0][4][1]  = B00000000; dataArray[5][0][1][4][0]  = B00000000; dataArray[5][0][1][4][1]  = B00000000;
+  dataArray[5][0][0][3][0]  = B00000000; dataArray[5][0][0][3][1]  = B00000000; dataArray[5][0][1][3][0]  = B00000000; dataArray[5][0][1][3][1]  = B00000000;
+  dataArray[5][0][0][2][0]  = B00000000; dataArray[5][0][0][2][1]  = B00000000; dataArray[5][0][1][2][0]  = B00000000; dataArray[5][0][1][2][1]  = B00000000;
+  dataArray[5][0][0][1][0]  = B00000000; dataArray[5][0][0][1][1]  = B00000000; dataArray[5][0][1][1][0]  = B00000000; dataArray[5][0][1][1][1]  = B00000000;
+  dataArray[5][0][0][0][0]  = B00000000; dataArray[5][0][0][0][1]  = B00000000; dataArray[5][0][1][0][0]  = B00000000; dataArray[5][0][1][0][1]  = B00000000;
+  
+  // Frame: 5 (LIGHT.WAV text, Part 3) / Color: GREEN
+  dataArray[5][1][0][15][0] = B00000000; dataArray[5][1][0][15][1] = B00000000; dataArray[5][1][1][15][0] = B00000000; dataArray[5][1][1][15][1] = B00000000;
+  dataArray[5][1][0][14][0] = B00000000; dataArray[5][1][0][14][1] = B00000000; dataArray[5][1][1][14][0] = B00000000; dataArray[5][1][1][14][1] = B00000000;
+  dataArray[5][1][0][13][0] = B00000000; dataArray[5][1][0][13][1] = B00000000; dataArray[5][1][1][13][0] = B00000000; dataArray[5][1][1][13][1] = B00000000;
+  dataArray[5][1][0][12][0] = B00000000; dataArray[5][1][0][12][1] = B00000000; dataArray[5][1][1][12][0] = B00000000; dataArray[5][1][1][12][1] = B00000000;
+  dataArray[5][1][0][11][0] = B00000000; dataArray[5][1][0][11][1] = B00000000; dataArray[5][1][1][11][0] = B00000000; dataArray[5][1][1][11][1] = B00000000;
+  dataArray[5][1][0][10][0] = B00000000; dataArray[5][1][0][10][1] = B00000000; dataArray[5][1][1][10][0] = B00000000; dataArray[5][1][1][10][1] = B00000000;
+  dataArray[5][1][0][9][0]  = B00000000; dataArray[5][1][0][9][1]  = B00000000; dataArray[5][1][1][9][0]  = B00000000; dataArray[5][1][1][9][1]  = B00000000;
+  dataArray[5][1][0][8][0]  = B00000000; dataArray[5][1][0][8][1]  = B00000000; dataArray[5][1][1][8][0]  = B00000000; dataArray[5][1][1][8][1]  = B00000000;
+  dataArray[5][1][0][7][0]  = B00000000; dataArray[5][1][0][7][1]  = B00000000; dataArray[5][1][1][7][0]  = B00000000; dataArray[5][1][1][7][1]  = B00000000;
+  dataArray[5][1][0][6][0]  = B00000000; dataArray[5][1][0][6][1]  = B00000000; dataArray[5][1][1][6][0]  = B00000000; dataArray[5][1][1][6][1]  = B00000000;
+  dataArray[5][1][0][5][0]  = B00000000; dataArray[5][1][0][5][1]  = B00000000; dataArray[5][1][1][5][0]  = B00000000; dataArray[5][1][1][5][1]  = B00000000;
+  dataArray[5][1][0][4][0]  = B00000000; dataArray[5][1][0][4][1]  = B00000000; dataArray[5][1][1][4][0]  = B00000000; dataArray[5][1][1][4][1]  = B00000000;
+  dataArray[5][1][0][3][0]  = B00000000; dataArray[5][1][0][3][1]  = B00000000; dataArray[5][1][1][3][0]  = B00000000; dataArray[5][1][1][3][1]  = B00000000;
+  dataArray[5][1][0][2][0]  = B00000000; dataArray[5][1][0][2][1]  = B00000000; dataArray[5][1][1][2][0]  = B00000000; dataArray[5][1][1][2][1]  = B00000000;
+  dataArray[5][1][0][1][0]  = B00000000; dataArray[5][1][0][1][1]  = B00000000; dataArray[5][1][1][1][0]  = B00000000; dataArray[5][1][1][1][1]  = B00000000;
+  dataArray[5][1][0][0][0]  = B00000000; dataArray[5][1][0][0][1]  = B00000000; dataArray[5][1][1][0][0]  = B00000000; dataArray[5][1][1][0][1]  = B00000000;
+  
+  // Frame: 5 (LIGHT.WAV text, Part 3) / Color: BLUE
+  dataArray[5][2][0][15][0] = B00000000; dataArray[5][2][0][15][1] = B00000000; dataArray[5][2][1][15][0] = B00000000; dataArray[5][2][1][15][1] = B00000000;
+  dataArray[5][2][0][14][0] = B00000000; dataArray[5][2][0][14][1] = B00000000; dataArray[5][2][1][14][0] = B00000000; dataArray[5][2][1][14][1] = B00000000;
+  dataArray[5][2][0][13][0] = B00000000; dataArray[5][2][0][13][1] = B00000000; dataArray[5][2][1][13][0] = B00000000; dataArray[5][2][1][13][1] = B00000000;
+  dataArray[5][2][0][12][0] = B00000000; dataArray[5][2][0][12][1] = B00000000; dataArray[5][2][1][12][0] = B00000000; dataArray[5][2][1][12][1] = B00000000;
+  dataArray[5][2][0][11][0] = B00000000; dataArray[5][2][0][11][1] = B00000000; dataArray[5][2][1][11][0] = B00000000; dataArray[5][2][1][11][1] = B00000000;
+  dataArray[5][2][0][10][0] = B00000000; dataArray[5][2][0][10][1] = B00000000; dataArray[5][2][1][10][0] = B00000000; dataArray[5][2][1][10][1] = B00000000;
+  dataArray[5][2][0][9][0]  = B00000000; dataArray[5][2][0][9][1]  = B00000000; dataArray[5][2][1][9][0]  = B00000000; dataArray[5][2][1][9][1]  = B00000000;
+  dataArray[5][2][0][8][0]  = B00000000; dataArray[5][2][0][8][1]  = B00000000; dataArray[5][2][1][8][0]  = B00000000; dataArray[5][2][1][8][1]  = B00000000;
+  dataArray[5][2][0][7][0]  = B00000000; dataArray[5][2][0][7][1]  = B00000000; dataArray[5][2][1][7][0]  = B00000000; dataArray[5][2][1][7][1]  = B00000000;
+  dataArray[5][2][0][6][0]  = B00000000; dataArray[5][2][0][6][1]  = B00000000; dataArray[5][2][1][6][0]  = B00000000; dataArray[5][2][1][6][1]  = B00000000;
+  dataArray[5][2][0][5][0]  = B00000000; dataArray[5][2][0][5][1]  = B00000000; dataArray[5][2][1][5][0]  = B00000000; dataArray[5][2][1][5][1]  = B00000000;
+  dataArray[5][2][0][4][0]  = B00000000; dataArray[5][2][0][4][1]  = B00000000; dataArray[5][2][1][4][0]  = B00000000; dataArray[5][2][1][4][1]  = B00000000;
+  dataArray[5][2][0][3][0]  = B00000000; dataArray[5][2][0][3][1]  = B00000000; dataArray[5][2][1][3][0]  = B00000000; dataArray[5][2][1][3][1]  = B00000000;
+  dataArray[5][2][0][2][0]  = B00000000; dataArray[5][2][0][2][1]  = B00000000; dataArray[5][2][1][2][0]  = B00000000; dataArray[5][2][1][2][1]  = B00000000;
+  dataArray[5][2][0][1][0]  = B00000000; dataArray[5][2][0][1][1]  = B00000000; dataArray[5][2][1][1][0]  = B00000000; dataArray[5][2][1][1][1]  = B00000000;
+  dataArray[5][2][0][0][0]  = B00000000; dataArray[5][2][0][0][1]  = B00000000; dataArray[5][2][1][0][0]  = B00000000; dataArray[5][2][1][0][1]  = B00000000;
+
+  // Frame: 6 (LIGHT.WAV text, Part 4) / Color: RED
+  dataArray[6][0][0][15][0] = B00000000; dataArray[6][0][0][15][1] = B00000000; dataArray[6][0][1][15][0] = B00000000; dataArray[6][0][1][15][1] = B00000000;
+  dataArray[6][0][0][14][0] = B00000000; dataArray[6][0][0][14][1] = B00000000; dataArray[6][0][1][14][0] = B00000000; dataArray[6][0][1][14][1] = B00000000;
+  dataArray[6][0][0][13][0] = B00000000; dataArray[6][0][0][13][1] = B00000000; dataArray[6][0][1][13][0] = B00000000; dataArray[6][0][1][13][1] = B00000000;
+  dataArray[6][0][0][12][0] = B00000000; dataArray[6][0][0][12][1] = B00000000; dataArray[6][0][1][12][0] = B00000000; dataArray[6][0][1][12][1] = B00000000;
+  dataArray[6][0][0][11][0] = B00000000; dataArray[6][0][0][11][1] = B00000000; dataArray[6][0][1][11][0] = B00000000; dataArray[6][0][1][11][1] = B00000000;
+  dataArray[6][0][0][10][0] = B00000000; dataArray[6][0][0][10][1] = B00000000; dataArray[6][0][1][10][0] = B00000000; dataArray[6][0][1][10][1] = B00000000;
+  dataArray[6][0][0][9][0]  = B00000000; dataArray[6][0][0][9][1]  = B00000000; dataArray[6][0][1][9][0]  = B00000000; dataArray[6][0][1][9][1]  = B00000000;
+  dataArray[6][0][0][8][0]  = B00000000; dataArray[6][0][0][8][1]  = B00000000; dataArray[6][0][1][8][0]  = B00000000; dataArray[6][0][1][8][1]  = B00000000;
+  dataArray[6][0][0][7][0]  = B00000000; dataArray[6][0][0][7][1]  = B00000000; dataArray[6][0][1][7][0]  = B00000000; dataArray[6][0][1][7][1]  = B00000000;
+  dataArray[6][0][0][6][0]  = B00000000; dataArray[6][0][0][6][1]  = B00000000; dataArray[6][0][1][6][0]  = B00000000; dataArray[6][0][1][6][1]  = B00000000;
+  dataArray[6][0][0][5][0]  = B00000000; dataArray[6][0][0][5][1]  = B00000000; dataArray[6][0][1][5][0]  = B00000000; dataArray[6][0][1][5][1]  = B00000000;
+  dataArray[6][0][0][4][0]  = B00000000; dataArray[6][0][0][4][1]  = B00000000; dataArray[6][0][1][4][0]  = B00000000; dataArray[6][0][1][4][1]  = B00000000;
+  dataArray[6][0][0][3][0]  = B00000000; dataArray[6][0][0][3][1]  = B00000000; dataArray[6][0][1][3][0]  = B00000000; dataArray[6][0][1][3][1]  = B00000000;
+  dataArray[6][0][0][2][0]  = B00000000; dataArray[6][0][0][2][1]  = B00000000; dataArray[6][0][1][2][0]  = B00000000; dataArray[6][0][1][2][1]  = B00000000;
+  dataArray[6][0][0][1][0]  = B00000000; dataArray[6][0][0][1][1]  = B00000000; dataArray[6][0][1][1][0]  = B00000000; dataArray[6][0][1][1][1]  = B00000000;
+  dataArray[6][0][0][0][0]  = B00000000; dataArray[6][0][0][0][1]  = B00000000; dataArray[6][0][1][0][0]  = B00000000; dataArray[6][0][1][0][1]  = B00000000;
+  
+  // Frame: 6 (LIGHT.WAV text, Part 4) / Color: GREEN
+  dataArray[6][1][0][15][0] = B00000000; dataArray[6][1][0][15][1] = B00000000; dataArray[6][1][1][15][0] = B00000000; dataArray[6][1][1][15][1] = B00000000;
+  dataArray[6][1][0][14][0] = B00000000; dataArray[6][1][0][14][1] = B00000000; dataArray[6][1][1][14][0] = B00000000; dataArray[6][1][1][14][1] = B00000000;
+  dataArray[6][1][0][13][0] = B00000000; dataArray[6][1][0][13][1] = B00000000; dataArray[6][1][1][13][0] = B00000000; dataArray[6][1][1][13][1] = B00000000;
+  dataArray[6][1][0][12][0] = B00000000; dataArray[6][1][0][12][1] = B00000000; dataArray[6][1][1][12][0] = B00000000; dataArray[6][1][1][12][1] = B00000000;
+  dataArray[6][1][0][11][0] = B00000000; dataArray[6][1][0][11][1] = B00000000; dataArray[6][1][1][11][0] = B00000000; dataArray[6][1][1][11][1] = B00000000;
+  dataArray[6][1][0][10][0] = B00000000; dataArray[6][1][0][10][1] = B00000000; dataArray[6][1][1][10][0] = B00000000; dataArray[6][1][1][10][1] = B00000000;
+  dataArray[6][1][0][9][0]  = B00000000; dataArray[6][1][0][9][1]  = B00000000; dataArray[6][1][1][9][0]  = B00000000; dataArray[6][1][1][9][1]  = B00000000;
+  dataArray[6][1][0][8][0]  = B00000000; dataArray[6][1][0][8][1]  = B00000000; dataArray[6][1][1][8][0]  = B00000000; dataArray[6][1][1][8][1]  = B00000000;
+  dataArray[6][1][0][7][0]  = B00000000; dataArray[6][1][0][7][1]  = B00000000; dataArray[6][1][1][7][0]  = B00000000; dataArray[6][1][1][7][1]  = B00000000;
+  dataArray[6][1][0][6][0]  = B00000000; dataArray[6][1][0][6][1]  = B00000000; dataArray[6][1][1][6][0]  = B00000000; dataArray[6][1][1][6][1]  = B00000000;
+  dataArray[6][1][0][5][0]  = B00000000; dataArray[6][1][0][5][1]  = B00000000; dataArray[6][1][1][5][0]  = B00000000; dataArray[6][1][1][5][1]  = B00000000;
+  dataArray[6][1][0][4][0]  = B00000000; dataArray[6][1][0][4][1]  = B00000000; dataArray[6][1][1][4][0]  = B00000000; dataArray[6][1][1][4][1]  = B00000000;
+  dataArray[6][1][0][3][0]  = B00000000; dataArray[6][1][0][3][1]  = B00000000; dataArray[6][1][1][3][0]  = B00000000; dataArray[6][1][1][3][1]  = B00000000;
+  dataArray[6][1][0][2][0]  = B00000000; dataArray[6][1][0][2][1]  = B00000000; dataArray[6][1][1][2][0]  = B00000000; dataArray[6][1][1][2][1]  = B00000000;
+  dataArray[6][1][0][1][0]  = B00000000; dataArray[6][1][0][1][1]  = B00000000; dataArray[6][1][1][1][0]  = B00000000; dataArray[6][1][1][1][1]  = B00000000;
+  dataArray[6][1][0][0][0]  = B00000000; dataArray[6][1][0][0][1]  = B00000000; dataArray[6][1][1][0][0]  = B00000000; dataArray[6][1][1][0][1]  = B00000000;
+  
+  // Frame: 6 (LIGHT.WAV text, Part 4) / Color: BLUE
+  dataArray[6][2][0][15][0] = B00000000; dataArray[6][2][0][15][1] = B00000000; dataArray[6][2][1][15][0] = B00000000; dataArray[6][2][1][15][1] = B00000000;
+  dataArray[6][2][0][14][0] = B00000000; dataArray[6][2][0][14][1] = B00000000; dataArray[6][2][1][14][0] = B00000000; dataArray[6][2][1][14][1] = B00000000;
+  dataArray[6][2][0][13][0] = B00000000; dataArray[6][2][0][13][1] = B00000000; dataArray[6][2][1][13][0] = B00000000; dataArray[6][2][1][13][1] = B00000000;
+  dataArray[6][2][0][12][0] = B00000000; dataArray[6][2][0][12][1] = B00000000; dataArray[6][2][1][12][0] = B00000000; dataArray[6][2][1][12][1] = B00000000;
+  dataArray[6][2][0][11][0] = B00000000; dataArray[6][2][0][11][1] = B00000000; dataArray[6][2][1][11][0] = B00000000; dataArray[6][2][1][11][1] = B00000000;
+  dataArray[6][2][0][10][0] = B00000000; dataArray[6][2][0][10][1] = B00000000; dataArray[6][2][1][10][0] = B00000000; dataArray[6][2][1][10][1] = B00000000;
+  dataArray[6][2][0][9][0]  = B00000000; dataArray[6][2][0][9][1]  = B00000000; dataArray[6][2][1][9][0]  = B00000000; dataArray[6][2][1][9][1]  = B00000000;
+  dataArray[6][2][0][8][0]  = B00000000; dataArray[6][2][0][8][1]  = B00000000; dataArray[6][2][1][8][0]  = B00000000; dataArray[6][2][1][8][1]  = B00000000;
+  dataArray[6][2][0][7][0]  = B00000000; dataArray[6][2][0][7][1]  = B00000000; dataArray[6][2][1][7][0]  = B00000000; dataArray[6][2][1][7][1]  = B00000000;
+  dataArray[6][2][0][6][0]  = B00000000; dataArray[6][2][0][6][1]  = B00000000; dataArray[6][2][1][6][0]  = B00000000; dataArray[6][2][1][6][1]  = B00000000;
+  dataArray[6][2][0][5][0]  = B00000000; dataArray[6][2][0][5][1]  = B00000000; dataArray[6][2][1][5][0]  = B00000000; dataArray[6][2][1][5][1]  = B00000000;
+  dataArray[6][2][0][4][0]  = B00000000; dataArray[6][2][0][4][1]  = B00000000; dataArray[6][2][1][4][0]  = B00000000; dataArray[6][2][1][4][1]  = B00000000;
+  dataArray[6][2][0][3][0]  = B00000000; dataArray[6][2][0][3][1]  = B00000000; dataArray[6][2][1][3][0]  = B00000000; dataArray[6][2][1][3][1]  = B00000000;
+  dataArray[6][2][0][2][0]  = B00000000; dataArray[6][2][0][2][1]  = B00000000; dataArray[6][2][1][2][0]  = B00000000; dataArray[6][2][1][2][1]  = B00000000;
+  dataArray[6][2][0][1][0]  = B00000000; dataArray[6][2][0][1][1]  = B00000000; dataArray[6][2][1][1][0]  = B00000000; dataArray[6][2][1][1][1]  = B00000000;
+  dataArray[6][2][0][0][0]  = B00000000; dataArray[6][2][0][0][1]  = B00000000; dataArray[6][2][1][0][0]  = B00000000; dataArray[6][2][1][0][1]  = B00000000;
 }
 
 void loadObra()
